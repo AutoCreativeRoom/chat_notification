@@ -118,14 +118,13 @@
       async function loadNotifications() {
         try {
           const response = await fetch("https://chat-notification.vercel.app", {
-            method: "GET", // ou 'POST', dependendo do seu webhook
+            method: "GET",
             headers: {
               "Content-Type": "application/json",
             },
           });
 
           const data = await response.json();
-
           const notificationsDiv = document.getElementById("notifications");
 
           // Exemplo de como inserir as notificações
@@ -138,8 +137,31 @@
               </div>
             `;
           });
+
+          // Enviar as notificações para o webhook
+          await sendNotificationsToWebhook(data);
         } catch (error) {
           console.error("Erro ao carregar notificações:", error);
+        }
+      }
+
+      // Função para enviar as notificações para o webhook
+      async function sendNotificationsToWebhook(notifications) {
+        try {
+          const response = await fetch("https://chat-notification.vercel.app", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(notifications),
+          });
+
+          if (!response.ok) {
+            throw new Error(`Erro HTTP! Status: ${response.status}`);
+          }
+
+          const data = await response.json();
+          console.log("Resposta do webhook:", data);
+        } catch (error) {
+          console.error("Erro ao enviar notificações:", error);
         }
       }
 
