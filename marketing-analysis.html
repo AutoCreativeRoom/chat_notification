@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Análise de Campanha - Marketing Digital</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Roboto", sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+        color: #0f0f0f;
+      }
+      header {
+        background: linear-gradient(to right, #f42a39, #911010);
+        color: white;
+        padding: 20px;
+        text-align: center;
+      }
+      main {
+        width: 80%;
+        margin: 20px auto;
+      }
+      .upload-container {
+        background: rgb(255, 255, 255);
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
+      }
+      input[type="file"] {
+        margin: 10px 0;
+      }
+      button {
+        background-color: #c01a1a;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        cursor: pointer;
+        border-radius: 5px;
+      }
+      button:hover {
+        background-color: #f42a39;
+      }
+      .hidden {
+        display: none;
+      }
+      .card {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+        text-align: center;
+      }
+      .positive {
+        color: green;
+      }
+      .negative {
+        color: red;
+      }
+      .suggestion {
+        color: blue;
+      }
+      footer {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #333;
+        height: 100px;
+      }
+      footer p {
+        color: #c0bbbb;
+        text-align: center;
+        padding: 10px;
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div>
+        <h1>Análise de Campanha</h1>
+        <p>Relatório de Performance - Tráfego Pago</p>
+      </div>
+    </header>
+
+    <main>
+      <div class="upload-container">
+        <form id="uploadForm">
+          <label>Selecione o arquivo XLS para análise</label>
+          <input type="file" id="fileInput" accept=".xls,.xlsx" />
+          <button type="submit">Analisar</button>
+        </form>
+      </div>
+
+      <div id="resultadoAnalise" class="hidden">
+        <div class="card">
+          <i class="fas fa-chart-line"></i>
+          <h2>Análise do Gestor</h2>
+          <p id="dataAnalise"></p>
+        </div>
+      </div>
+
+      <div id="gridAnalise" class="hidden">
+        <div class="card">
+          <i class="fas fa-plus nome"></i>
+          <h3>Pontos Positivos</h3>
+          <div id="nome"></div>
+        </div>
+
+        <div class="card">
+          <i class="fas fa-plus positive"></i>
+          <h3>Pontos Positivos</h3>
+          <div id="pontosPositivos"></div>
+        </div>
+
+        <div class="card">
+          <i class="fas fa-minus negative"></i>
+          <h3>Pontos Negativos</h3>
+          <div id="pontosNegativos"></div>
+        </div>
+
+        <div class="card">
+          <i class="fas fa-lightbulb suggestion"></i>
+          <h3>Sugestões</h3>
+          <div id="sugestoes"></div>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <p>&copy; 2025 Sua Agência de Marketing. Todos os direitos reservados.</p>
+    </footer>
+
+    <!-- <script>
+      document
+        .getElementById("uploadForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const fileInput = document.getElementById("fileInput");
+          const file = fileInput.files[0];
+
+          if (!file) {
+            alert("Por favor, selecione um arquivo.");
+            return;
+          }
+
+          const formData = new FormData();
+          formData.append("arquivo", file);
+
+          try {
+            const response = await fetch(
+              "https://webhook.autocreativeroom.com.br/webhook/analista_api",
+              {
+                method: "POST",
+                body: formData,
+              }
+            );
+
+            if (!response.ok) {
+              throw new Error("Erro na requisição");
+            }
+
+            const data = await response.json();
+
+            // Atualiza a data
+            const dataAtual = new Date().toLocaleDateString("pt-BR");
+            document.getElementById(
+              "dataAnalise"
+            ).textContent = `Data da análise: ${dataAtual}`;
+
+            // Converte o markdown para HTML básico
+            const convertMarkdownToHtml = (text) => {
+              return text
+                .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+                .replace(/\n/g, "<br>")
+                .replace(/- /g, "• ");
+            };
+
+            // Atualiza os conteúdos
+            document.getElementById("nome").innerHTML = convertMarkdownToHtml(
+              data.nome
+            );
+            document.getElementById("pontosPositivos").innerHTML =
+              convertMarkdownToHtml(data.pontos_positivos);
+            document.getElementById("pontosNegativos").innerHTML =
+              convertMarkdownToHtml(data.pontos_negativos);
+            document.getElementById("sugestoes").innerHTML =
+              convertMarkdownToHtml(data.sugestao);
+
+            // Mostra os resultados
+            document.getElementById("resultadoAnalise").style.display = "block";
+            document.getElementById("gridAnalise").style.display = "grid";
+          } catch (error) {
+            alert("Erro ao processar o arquivo. Por favor, tente novamente.");
+            console.error("Erro:", error);
+          }
+        });
+    </script> -->
+
+    <script>
+      document
+        .getElementById("uploadForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const fileInput = document.getElementById("fileInput");
+          const file = fileInput.files[0];
+
+          if (!file) {
+            alert("Por favor, selecione um arquivo.");
+            return;
+          }
+
+          const formData = new FormData();
+          formData.append("arquivo", file);
+
+          try {
+            const response = await fetch(
+              "https://webhook.autocreativeroom.com.br/webhook/analista_api",
+              {
+                method: "POST",
+                body: formData,
+              }
+            );
+
+            if (!response.ok) {
+              throw new Error("Erro na requisição");
+            }
+
+            const data = await response.json();
+
+            // Atualiza a data
+            const dataAtual = new Date().toLocaleDateString("pt-BR");
+            document.getElementById(
+              "dataAnalise"
+            ).textContent = `Data da análise: ${dataAtual}`;
+
+            // Converte markdown para HTML básico
+            const convertMarkdownToHtml = (text) => {
+              return text
+                .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+                .replace(/\n/g, "<br>")
+                .replace(/- /g, "• ");
+            };
+
+            // Limpa o grid antes de adicionar novos elementos
+            const gridAnalise = document.getElementById("gridAnalise");
+            gridAnalise.innerHTML = "";
+
+            // Itera sobre os dados da API e cria os cards dinamicamente
+            data.forEach((campanha) => {
+              const card = document.createElement("div");
+              card.classList.add("card");
+
+              card.innerHTML = `
+            <i class="fas fa-chart-line"></i>
+            <h2>${campanha.nome}</h2>
+            <h3 class="positive">Pontos Positivos</h3>
+            <p>${convertMarkdownToHtml(campanha.pontos_positivos)}</p>
+            <h3 class="negative">Pontos Negativos</h3>
+            <p>${convertMarkdownToHtml(campanha.pontos_negativos)}</p>
+            ${
+              campanha.sugestao
+                ? `<h3 class="suggestion">Sugestões</h3><p>${convertMarkdownToHtml(
+                    campanha.sugestao
+                  )}</p>`
+                : ""
+            }
+          `;
+
+              gridAnalise.appendChild(card);
+            });
+
+            // Mostra os resultados
+            document.getElementById("resultadoAnalise").style.display = "block";
+            gridAnalise.style.display = "grid";
+          } catch (error) {
+            alert("Erro ao processar o arquivo. Por favor, tente novamente.");
+            console.error("Erro:", error);
+          }
+        });
+    </script>
+  </body>
+</html>
