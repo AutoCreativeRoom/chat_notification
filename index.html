@@ -1,224 +1,62 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Chat com Webhook</title>
+    <title>Notificação de Cliente</title>
     <style>
       body {
         font-family: Arial, sans-serif;
-        background-color: #f4f4f4;
-        margin: 0;
-        padding: 0;
+        margin: 20px;
       }
-
-      /* Botão flutuante */
-      .chat-button {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        background: blue;
-        color: white;
-        border: none;
-        padding: 15px;
-        border-radius: 50%;
-        cursor: pointer;
+      .client-info {
+        background-color: #f0f0f0;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+      }
+      .client-info h2 {
+        color: #333;
+      }
+      .client-info p {
         font-size: 16px;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-      }
-
-      /* Container do chat */
-      .chat-container {
-        position: fixed;
-        bottom: 80px;
-        right: 20px;
-        width: 350px;
-        background: white;
-        padding: 15px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        border-radius: 10px;
-        display: none;
-        flex-direction: column;
-      }
-
-      .chat-header {
-        font-weight: bold;
-        margin-bottom: 10px;
-        text-align: center;
-      }
-
-      .messages {
-        height: 250px;
-        overflow-y: auto;
-        border: 1px solid #ddd;
-        padding: 10px;
-        border-radius: 5px;
-        background: #f9f9f9;
-      }
-
-      .input-container {
-        display: flex;
-        margin-top: 10px;
-      }
-
-      input {
-        flex: 1;
-        padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-      }
-
-      button {
-        padding: 10px;
-        margin-left: 5px;
-        background: blue;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-      }
-
-      /* Estilo para as notificações */
-      .notification {
-        background-color: #f9f9f9;
-        border: 1px solid #ddd;
-        padding: 10px;
-        margin-bottom: 10px;
-        border-radius: 5px;
+        color: #555;
       }
     </style>
   </head>
   <body>
-    <!-- Botão flutuante -->
-    <button class="chat-button" onclick="toggleChat()">💬</button>
-
-    <!-- Container do Chat -->
-    <div class="chat-container" id="chatContainer">
-      <div class="chat-header">Chat Online</div>
-      <div class="messages" id="messages"></div>
-      <div class="input-container">
-        <input
-          type="text"
-          id="messageInput"
-          placeholder="Digite sua mensagem..."
-          onkeypress="handleKeyPress(event)"
-        />
-        <button onclick="sendMessage()">Enviar</button>
-      </div>
-    </div>
-
-    <!-- Container das Notificações -->
-    <div id="notifications" style="margin-top: 20px; padding: 20px">
-      <h2>Notificações</h2>
-      <!-- As notificações serão carregadas aqui -->
+    <h1>Informações do Cliente</h1>
+    <div id="client-info" class="client-info">
+      <h2>Carregando...</h2>
     </div>
 
     <script>
-      // Função para carregar notificações
-      async function loadNotifications() {
+      // Função para buscar os dados JSON
+      async function fetchClientData() {
         try {
-          const response = await fetch("https://chat-notification.vercel.app", {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          });
-
+          const response = await fetch("https://chat-notification.vercel.app"); // Substitua pela URL do n8n ou o endpoint real
           const data = await response.json();
-          const notificationsDiv = document.getElementById("notifications");
 
-          // Exemplo de como inserir as notificações
-          data.forEach((notification) => {
-            notificationsDiv.innerHTML += `
-              <div class="notification">
-                <strong>Nome:</strong> ${notification.nome}<br>
-                <strong>Email:</strong> ${notification.email}<br>
-                <strong>Cliente:</strong> ${notification.cliente}
-              </div>
-            `;
-          });
+          // Pegue os dados do JSON
+          const clientName = data[0].nome;
+          const clientEmail = data[0].email;
+          const clientPhone = data[0].cliente;
 
-          // Enviar as notificações para o webhook
-          await sendNotificationsToWebhook(data);
+          // Preencha o conteúdo no HTML
+          document.getElementById("client-info").innerHTML = `
+                    <h2>${clientName}</h2>
+                    <p><strong>Email:</strong> ${clientEmail}</p>
+                    <p><strong>Telefone:</strong> ${clientPhone}</p>
+                `;
         } catch (error) {
-          console.error("Erro ao carregar notificações:", error);
+          console.error("Erro ao buscar os dados:", error);
+          document.getElementById("client-info").innerHTML =
+            "<p>Não foi possível carregar os dados.</p>";
         }
       }
 
-      // Função para enviar as notificações para o webhook
-      async function sendNotificationsToWebhook(notifications) {
-        try {
-          const response = await fetch("https://chat-notification.vercel.app", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(notifications),
-          });
-
-          if (!response.ok) {
-            throw new Error(`Erro HTTP! Status: ${response.status}`);
-          }
-
-          const data = await response.json();
-          console.log("Resposta do webhook:", data);
-        } catch (error) {
-          console.error("Erro ao enviar notificações:", error);
-        }
-      }
-
-      // Chama a função para carregar as notificações quando a página carregar
-      loadNotifications();
-
-      // Função de controle do chat
-      function toggleChat() {
-        const chatContainer = document.getElementById("chatContainer");
-        chatContainer.style.display =
-          chatContainer.style.display === "flex" ? "none" : "flex";
-      }
-
-      function handleKeyPress(event) {
-        if (event.key === "Enter") {
-          sendMessage();
-        }
-      }
-
-      async function sendMessage() {
-        const input = document.getElementById("messageInput");
-        const message = input.value.trim();
-        if (!message) return;
-
-        const messagesDiv = document.getElementById("messages");
-        messagesDiv.innerHTML += `<div><strong>Você:</strong> ${message}</div>`;
-        input.value = "";
-
-        try {
-          const response = await fetch(
-            "https://webhook.autocreativeroom.com.br/webhook/chat_entries",
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ message }),
-            }
-          );
-
-          if (!response.ok) {
-            throw new Error(`Erro HTTP! Status: ${response.status}`);
-          }
-
-          const data = await response.json();
-          console.log("Resposta do webhook:", data);
-
-          if (data && data.text) {
-            messagesDiv.innerHTML += `<div><strong>Bot:</strong> ${data.text}</div>`;
-          } else {
-            messagesDiv.innerHTML += `<div style="color:red;"><strong>Erro:</strong> Resposta inesperada do servidor</div>`;
-          }
-        } catch (error) {
-          console.error("Erro ao enviar mensagem:", error);
-          messagesDiv.innerHTML += `<div style="color:red;"><strong>Erro:</strong> Falha na conexão</div>`;
-        }
-
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
-      }
+      // Chame a função para carregar os dados
+      fetchClientData();
     </script>
   </body>
 </html>
