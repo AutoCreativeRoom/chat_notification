@@ -117,7 +117,7 @@
       // Função para carregar notificações
       async function loadNotifications() {
         try {
-          const response = await fetch("http://127.0.0.1:5500/chat.html", {
+          const response = await fetch("https://chat-notification.vercel.app", {
             method: "GET", // ou 'POST', dependendo do seu webhook
             headers: {
               "Content-Type": "application/json",
